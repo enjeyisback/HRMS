@@ -91,6 +91,9 @@ const employeeSchema = z.object({
     pf_contribution_percent: z.coerce.number().optional(),
     esic_applicable: z.boolean().default(false).optional(),
     role_id: z.string().min(1, { message: "Role is required." }),
+
+    // Login Credentials
+    password: z.string().min(6, { message: "Password must be at least 6 characters." }),
 })
 
 type EmployeeFormValues = z.input<typeof employeeSchema>
@@ -127,49 +130,68 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
         fetchOptions()
     }, [])
 
+    const formDefaults: EmployeeFormValues = {
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: "",
+        gender: "Male",
+        joining_date: new Date().toISOString().split('T')[0],
+        employment_type: "Full-Time",
+        status: "Active",
+        esic_applicable: false,
+        probation_period_months: 0,
+        role_id: "",
+        employee_code: "",
+        dob: "",
+        blood_group: "",
+        marital_status: "",
+        current_address_street: "",
+        current_address_city: "",
+        current_address_state: "",
+        current_address_zip: "",
+        permanent_address_street: "",
+        permanent_address_city: "",
+        permanent_address_state: "",
+        permanent_address_zip: "",
+        emergency_contact_name: "",
+        emergency_contact_phone: "",
+        work_location: "",
+        official_email: "",
+        bank_account_no: "",
+        bank_name: "",
+        bank_ifsc: "",
+        bank_branch: "",
+        pan_number: "",
+        aadhaar_number: "",
+        uan_number: "",
+        esic_number: "",
+        base_salary: 0,
+        hra: 0,
+        other_allowances: 0,
+        pf_contribution_percent: 0,
+        department_id: "",
+        designation_id: "",
+        reporting_manager_id: "",
+        confirmation_date: "",
+        password: "",
+    }
+
+    // Merge initialData into defaults — ensures no field is ever undefined
+    const mergedDefaults = initialData
+        ? Object.fromEntries(
+            Object.entries(formDefaults).map(([key, defaultVal]) => [
+                key,
+                initialData[key] !== undefined && initialData[key] !== null
+                    ? initialData[key]
+                    : defaultVal,
+            ])
+        )
+        : formDefaults
+
     const form = useForm<EmployeeFormValues>({
         resolver: zodResolver(employeeSchema),
-        defaultValues: initialData || {
-            first_name: "",
-            last_name: "",
-            email: "",
-            phone: "",
-            gender: "Male",
-            joining_date: new Date().toISOString().split('T')[0],
-            employment_type: "Full-Time",
-            status: "Active",
-            esic_applicable: false,
-            probation_period_months: 0,
-            role_id: "",
-            employee_code: "",
-            dob: "",
-            blood_group: "",
-            marital_status: "",
-            current_address_street: "",
-            current_address_city: "",
-            current_address_state: "",
-            current_address_zip: "",
-            permanent_address_street: "",
-            permanent_address_city: "",
-            permanent_address_state: "",
-            permanent_address_zip: "",
-            emergency_contact_name: "",
-            emergency_contact_phone: "",
-            work_location: "",
-            official_email: "",
-            bank_account_no: "",
-            bank_name: "",
-            bank_ifsc: "",
-            bank_branch: "",
-            pan_number: "",
-            aadhaar_number: "",
-            uan_number: "",
-            esic_number: "",
-            base_salary: 0,
-            hra: 0,
-            other_allowances: 0,
-            pf_contribution_percent: 0,
-        },
+        defaultValues: mergedDefaults as EmployeeFormValues,
     })
 
     // Handle "Same as Current Address" toggle
@@ -185,32 +207,21 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
 
     async function onSubmit(values: EmployeeFormValues) {
         setLoading(true)
-        const supabase = createClient()
 
         try {
-            // Auto-generate Official Email if empty
-            if (!values.official_email) {
-                values.official_email = `${values.first_name.toLowerCase()}.${values.last_name.toLowerCase()}@company.com`
+            const response = await fetch('/api/employees', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(values),
+            })
+
+            const result = await response.json()
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to create employee')
             }
 
-            // Auto-generate Employee Code if empty (Simple logic for demo)
-            if (!values.employee_code) {
-                const { count } = await supabase.from('employees').select('*', { count: 'exact', head: true })
-                const nextId = (count || 0) + 1
-                values.employee_code = `EMP${nextId.toString().padStart(3, '0')}`
-            }
-
-            const { error } = await supabase.from("employees").insert(values)
-
-            if (error) throw error
-
-            // Handle File Uploads (Link files to employee - strictly we need employee ID first)
-            // For now, files are just uploaded, linking logic would need the returned ID.
-            // Since insert doesn't return ID by default unless .select() is used.
-            // We'll skip complex file linking implementation in this step to keep it simple, 
-            // verifying the core form works first.
-
-            toast.success(initialData ? "Employee updated successfully" : "Employee saved successfully")
+            toast.success(`Employee created! They can log in with: ${values.email}`)
             router.refresh()
             onClose()
         } catch (error: any) {
@@ -315,6 +326,14 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                                 )} />
                                 <FormField control={form.control} name="phone" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Phone*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name="password" render={({ field }: { field: any }) => (
+                                    <FormItem>
+                                        <FormLabel>Login Password*</FormLabel>
+                                        <FormControl><Input type="password" placeholder="Min 6 characters" {...field} /></FormControl>
+                                        <FormDescription>Employee will use their email and this password to log in.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
                                 )} />
                             </div>
 

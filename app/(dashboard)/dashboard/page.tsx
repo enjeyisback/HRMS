@@ -5,6 +5,7 @@ import { AdminDashboard } from "@/components/dashboard/AdminDashboard"
 import { EmployeeDashboard } from "@/components/dashboard/EmployeeDashboard"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { Loader2 } from "lucide-react"
 
 export default function DashboardPage() {
     const { user, loading } = useAuth()
@@ -33,7 +34,12 @@ export default function DashboardPage() {
         fetchRole()
     }, [user])
 
-    if (loading) return <div>Loading...</div>
+    if (loading) return (
+        <div className="flex flex-col items-center justify-center gap-3 py-32">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground font-medium">Loading dashboard...</p>
+        </div>
+    )
 
     return (
         <div className="flex-1 space-y-4">
