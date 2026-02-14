@@ -20,6 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2, Mail, ShieldCheck, Send } from "lucide-react"
 import { logAction } from "@/lib/audit-logger"
+import { toast } from "sonner"
 
 const emailSchema = z.object({
     smtp_host: z.string().min(1, "Host is required"),
@@ -75,9 +76,9 @@ export function EmailSettings() {
                 description: 'Updated SMTP email settings'
             })
 
-            alert("Email settings saved")
+            toast.success("Email settings updated successfully")
         } catch (error: any) {
-            alert("Error: " + error.message)
+            toast.error(error.message || "Failed to save email settings")
         } finally {
             setSaving(false)
         }

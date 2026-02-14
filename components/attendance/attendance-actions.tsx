@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, MapPin, Clock, LogIn, LogOut, AlertCircle } from "lucide-react"
 import { format, isAfter, parse, differenceInHours, differenceInMinutes } from "date-fns"
+import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Attendance } from "@/types"
 
 export function AttendanceActions() {
     const { user } = useAuth()
+    const [hasMounted, setHasMounted] = useState(false)
     const [loading, setLoading] = useState(true)
     const [actionLoading, setActionLoading] = useState(false)
     const [attendance, setAttendance] = useState<Attendance | null>(null)
@@ -47,6 +49,7 @@ export function AttendanceActions() {
     }
 
     useEffect(() => {
+        setHasMounted(true)
         fetchTodayAttendance()
     }, [user])
 
@@ -99,9 +102,10 @@ export function AttendanceActions() {
             })
 
             if (insError) throw insError
+            toast.success("Checked in successfully")
             await fetchTodayAttendance()
         } catch (err: any) {
-            setError(err.message)
+            toast.error(err.message || "Failed to check in")
         } finally {
             setActionLoading(false)
         }
@@ -130,15 +134,16 @@ export function AttendanceActions() {
                 .eq('id', attendance.id)
 
             if (updError) throw updError
+            toast.success("Checked out successfully")
             await fetchTodayAttendance()
         } catch (err: any) {
-            setError(err.message)
+            toast.error(err.message || "Failed to check out")
         } finally {
             setActionLoading(false)
         }
     }
 
-    if (loading) return <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>
+    if (!hasMounted || loading) return <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>
 
     return (
         <Card>

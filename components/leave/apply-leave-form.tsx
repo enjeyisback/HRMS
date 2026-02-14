@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { Loader2, Calendar as CalendarIcon, Upload, AlertCircle } from "lucide-react"
 import { format, differenceInBusinessDays, differenceInDays, addDays, isWeekend } from "date-fns"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -173,10 +174,7 @@ export function ApplyLeaveForm({ onSuccess }: { onSuccess?: () => void }) {
 
             if (reqError) throw reqError
 
-            // 3. Update Pending Balance (Optional, trigger can handle this)
-            // For now, client side optimistic or just re-fetch
-
-            alert("Leave application submitted successfully!")
+            toast.success("Leave application submitted successfully!")
             form.reset()
             setFileState(null)
             if (onSuccess) onSuccess()
@@ -184,7 +182,7 @@ export function ApplyLeaveForm({ onSuccess }: { onSuccess?: () => void }) {
 
         } catch (error: any) {
             console.error("Leave Application Error:", error.message || error, error.details || "", error.hint || "")
-            alert("Error applying leave: " + (error.message || "Unknown error"))
+            toast.error(error.message || "Failed to apply for leave")
         } finally {
             setLoading(false)
         }
@@ -193,7 +191,7 @@ export function ApplyLeaveForm({ onSuccess }: { onSuccess?: () => void }) {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField control={form.control} name="leave_type_id" render={({ field }) => (
+                <FormField control={form.control} name="leave_type_id" render={({ field }: { field: any }) => (
                     <FormItem>
                         <FormLabel>Leave Type</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -214,7 +212,7 @@ export function ApplyLeaveForm({ onSuccess }: { onSuccess?: () => void }) {
                     </FormItem>
                 )} />
 
-                <FormField control={form.control} name="date_range" render={({ field }) => (
+                <FormField control={form.control} name="date_range" render={({ field }: { field: any }) => (
                     <FormItem className="flex flex-col">
                         <FormLabel>Duration</FormLabel>
                         <Popover>
@@ -269,7 +267,7 @@ export function ApplyLeaveForm({ onSuccess }: { onSuccess?: () => void }) {
                     </Alert>
                 )}
 
-                <FormField control={form.control} name="reason" render={({ field }) => (
+                <FormField control={form.control} name="reason" render={({ field }: { field: any }) => (
                     <FormItem>
                         <FormLabel>Reason</FormLabel>
                         <FormControl><Textarea placeholder="Why do you need leave?" {...field} /></FormControl>

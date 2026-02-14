@@ -31,6 +31,7 @@ const statusColors: Record<string, string> = {
 
 export function AttendanceCalendar() {
     const { user } = useAuth()
+    const [hasMounted, setHasMounted] = useState(false)
     const [currentMonth, setCurrentMonth] = useState(new Date())
     const [loading, setLoading] = useState(true)
     const [records, setRecords] = useState<Attendance[]>([])
@@ -73,6 +74,7 @@ export function AttendanceCalendar() {
     }
 
     useEffect(() => {
+        setHasMounted(true)
         fetchMonthData()
     }, [user, currentMonth])
 
@@ -135,7 +137,7 @@ export function AttendanceCalendar() {
                 </div>
             </CardHeader>
             <CardContent>
-                {loading ? (
+                {!hasMounted || loading ? (
                     <div className="flex justify-center p-12"><Loader2 className="h-8 w-8 animate-spin" /></div>
                 ) : (
                     <div className="space-y-6">

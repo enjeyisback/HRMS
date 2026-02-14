@@ -13,7 +13,8 @@ import {
     TableRow
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, History } from "lucide-react"
+import { Loader2, History, ClipboardList } from "lucide-react"
+import { EmptyState } from "@/components/ui/empty-state"
 import { format } from "date-fns"
 import { AttendanceRegularization } from "@/types"
 
@@ -73,8 +74,12 @@ export function AttendanceRegularizationList() {
                     <TableBody>
                         {requests.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                                    No regularization requests found.
+                                <TableCell colSpan={4} className="h-[300px] text-center">
+                                    <EmptyState
+                                        title="No requests"
+                                        description="You haven't submitted any regularization requests yet."
+                                        icon={ClipboardList}
+                                    />
                                 </TableCell>
                             </TableRow>
                         ) : (

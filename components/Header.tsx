@@ -54,7 +54,7 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full">
                         <Avatar>
-                            <AvatarImage src="/placeholder-user.jpg" alt="User" />
+                            <AvatarImage src={user?.user_metadata?.avatar_url} alt="User" />
                             <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <span className="sr-only">Toggle user menu</span>

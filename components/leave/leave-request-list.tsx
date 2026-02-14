@@ -15,7 +15,10 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Trash2 } from "lucide-react"
+import { Trash2, Plane } from "lucide-react"
+import { toast } from "sonner"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function LeaveRequestList() {
     const { user } = useAuth()
@@ -51,8 +54,11 @@ export function LeaveRequestList() {
         if (!confirm("Are you sure you want to cancel this request?")) return
         const supabase = createClient()
         const { error } = await supabase.from('leave_requests').update({ status: 'Cancelled' }).eq('id', id)
-        if (error) alert("Error cancelling: " + error.message)
-        else fetchRequests()
+        if (error) toast.error("Error cancelling: " + error.message)
+        else {
+            toast.success("Leave request cancelled")
+            fetchRequests()
+        }
     }
 
     const getStatusBadge = (status: string) => {
@@ -64,8 +70,20 @@ export function LeaveRequestList() {
         }
     }
 
-    if (loading) return <div>Loading records...</div>
-    if (requests.length === 0) return <div className="text-muted-foreground text-sm">No leave records found.</div>
+    if (loading) return (
+        <div className="space-y-2">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+        </div>
+    )
+    if (requests.length === 0) return (
+        <EmptyState
+            title="No leaves taken"
+            description="You haven't applied for any leaves yet."
+            icon={Plane}
+        />
+    )
 
     return (
         <div className="border rounded-md overflow-hidden">

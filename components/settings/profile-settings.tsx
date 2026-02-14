@@ -16,10 +16,11 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Loader2, User, Key, Camera } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Loader2, Camera, User, Key } from "lucide-react"
 import { logAction } from "@/lib/audit-logger"
+import { toast } from "sonner"
 
 const profileSchema = z.object({
     first_name: z.string().min(1, "First name is required"),
@@ -93,9 +94,9 @@ export function ProfileSettings() {
                 module: 'profile',
                 description: 'Updated own profile information'
             })
-            alert("Profile updated")
+            toast.success("Profile updated successfully")
         } catch (error: any) {
-            alert(error.message)
+            toast.error(error.message || "Failed to update profile")
         } finally {
             setSaving(false)
         }
@@ -110,9 +111,9 @@ export function ProfileSettings() {
             })
             if (error) throw error
             passwordForm.reset()
-            alert("Password updated successfully")
+            toast.success("Password updated successfully")
         } catch (error: any) {
-            alert(error.message)
+            toast.error(error.message || "Failed to update password")
         } finally {
             setSaving(false)
         }

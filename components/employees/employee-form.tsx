@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { Loader2, Plus, Trash2, Upload, FileText } from "lucide-react"
 import { format } from "date-fns"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -181,11 +182,12 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
             // We'll skip complex file linking implementation in this step to keep it simple, 
             // verifying the core form works first.
 
+            toast.success(initialData ? "Employee updated successfully" : "Employee saved successfully")
             router.refresh()
             onClose()
         } catch (error: any) {
             console.error("Submission Error:", error)
-            alert(`Failed to save employee: ${error.message}`)
+            toast.error(error.message || "Failed to save employee")
         } finally {
             setLoading(false)
         }
@@ -204,11 +206,12 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
         const { error: uploadError } = await supabase.storage.from('employee_documents').upload(filePath, file)
 
         if (uploadError) {
-            alert('Upload failed: ' + uploadError.message)
+            toast.error('Upload failed: ' + uploadError.message)
         } else {
             // Get public URL
             const { data } = supabase.storage.from('employee_documents').getPublicUrl(filePath)
             setUploadedFiles([...uploadedFiles, { name: file.name, url: data.publicUrl, type: 'document' }])
+            toast.success("File uploaded successfully")
         }
         setUploading(false)
     }
@@ -228,16 +231,16 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                         {/* Tab 1: Personal Information */}
                         <TabsContent value="personal" className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
-                                <FormField control={form.control} name="first_name" render={({ field }) => (
+                                <FormField control={form.control} name="first_name" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>First Name*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="last_name" render={({ field }) => (
+                                <FormField control={form.control} name="last_name" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Last Name*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="dob" render={({ field }) => (
+                                <FormField control={form.control} name="dob" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="gender" render={({ field }) => (
+                                <FormField control={form.control} name="gender" render={({ field }: { field: any }) => (
                                     <FormItem>
                                         <FormLabel>Gender*</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -251,7 +254,7 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                                         <FormMessage />
                                     </FormItem>
                                 )} />
-                                <FormField control={form.control} name="blood_group" render={({ field }) => (
+                                <FormField control={form.control} name="blood_group" render={({ field }: { field: any }) => (
                                     <FormItem>
                                         <FormLabel>Blood Group</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -265,7 +268,7 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                                         <FormMessage />
                                     </FormItem>
                                 )} />
-                                <FormField control={form.control} name="marital_status" render={({ field }) => (
+                                <FormField control={form.control} name="marital_status" render={({ field }: { field: any }) => (
                                     <FormItem>
                                         <FormLabel>Marital Status</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -279,10 +282,10 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                                         <FormMessage />
                                     </FormItem>
                                 )} />
-                                <FormField control={form.control} name="email" render={({ field }) => (
+                                <FormField control={form.control} name="email" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Personal Email*</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="phone" render={({ field }) => (
+                                <FormField control={form.control} name="phone" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Phone*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </div>
@@ -290,16 +293,16 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                             <Separator className="my-4" />
                             <h3 className="font-semibold mb-2">Current Address</h3>
                             <div className="grid grid-cols-2 gap-4">
-                                <FormField control={form.control} name="current_address_street" render={({ field }) => (
+                                <FormField control={form.control} name="current_address_street" render={({ field }: { field: any }) => (
                                     <FormItem className="col-span-2"><FormLabel>Street Address</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="current_address_city" render={({ field }) => (
+                                <FormField control={form.control} name="current_address_city" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="current_address_state" render={({ field }) => (
+                                <FormField control={form.control} name="current_address_state" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>State</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="current_address_zip" render={({ field }) => (
+                                <FormField control={form.control} name="current_address_zip" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>PIN Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </div>
@@ -314,16 +317,16 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                             </div>
                             {!sameAsCurrentAddress && (
                                 <div className="grid grid-cols-2 gap-4">
-                                    <FormField control={form.control} name="permanent_address_street" render={({ field }) => (
+                                    <FormField control={form.control} name="permanent_address_street" render={({ field }: { field: any }) => (
                                         <FormItem className="col-span-2"><FormLabel>Street Address</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                     )} />
-                                    <FormField control={form.control} name="permanent_address_city" render={({ field }) => (
+                                    <FormField control={form.control} name="permanent_address_city" render={({ field }: { field: any }) => (
                                         <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                     )} />
-                                    <FormField control={form.control} name="permanent_address_state" render={({ field }) => (
+                                    <FormField control={form.control} name="permanent_address_state" render={({ field }: { field: any }) => (
                                         <FormItem><FormLabel>State</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                     )} />
-                                    <FormField control={form.control} name="permanent_address_zip" render={({ field }) => (
+                                    <FormField control={form.control} name="permanent_address_zip" render={({ field }: { field: any }) => (
                                         <FormItem><FormLabel>PIN Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                     )} />
                                 </div>
@@ -332,10 +335,10 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                             <Separator className="my-4" />
                             <h3 className="font-semibold mb-2">Emergency Contact</h3>
                             <div className="grid grid-cols-2 gap-4">
-                                <FormField control={form.control} name="emergency_contact_name" render={({ field }) => (
+                                <FormField control={form.control} name="emergency_contact_name" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="emergency_contact_phone" render={({ field }) => (
+                                <FormField control={form.control} name="emergency_contact_phone" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Phone</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </div>
@@ -344,13 +347,13 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                         {/* Tab 2: Employment Details */}
                         <TabsContent value="employment" className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
-                                <FormField control={form.control} name="employee_code" render={({ field }) => (
+                                <FormField control={form.control} name="employee_code" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Employee ID (Auto-generated if empty)</FormLabel><FormControl><Input placeholder="EMP001" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="joining_date" render={({ field }) => (
+                                <FormField control={form.control} name="joining_date" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Joining Date*</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="role_id" render={({ field }) => (
+                                <FormField control={form.control} name="role_id" render={({ field }: { field: any }) => (
                                     <FormItem>
                                         <FormLabel>User Role*</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -362,7 +365,7 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                                         <FormMessage />
                                     </FormItem>
                                 )} />
-                                <FormField control={form.control} name="department_id" render={({ field }) => (
+                                <FormField control={form.control} name="department_id" render={({ field }: { field: any }) => (
                                     <FormItem>
                                         <FormLabel>Department*</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -374,7 +377,7 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                                         <FormMessage />
                                     </FormItem>
                                 )} />
-                                <FormField control={form.control} name="designation_id" render={({ field }) => (
+                                <FormField control={form.control} name="designation_id" render={({ field }: { field: any }) => (
                                     <FormItem>
                                         <FormLabel>Designation*</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -386,7 +389,7 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                                         <FormMessage />
                                     </FormItem>
                                 )} />
-                                <FormField control={form.control} name="reporting_manager_id" render={({ field }) => (
+                                <FormField control={form.control} name="reporting_manager_id" render={({ field }: { field: any }) => (
                                     <FormItem>
                                         <FormLabel>Reporting Manager</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -399,7 +402,7 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                                         <FormMessage />
                                     </FormItem>
                                 )} />
-                                <FormField control={form.control} name="employment_type" render={({ field }) => (
+                                <FormField control={form.control} name="employment_type" render={({ field }: { field: any }) => (
                                     <FormItem>
                                         <FormLabel>Employment Type*</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -414,16 +417,16 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                                         <FormMessage />
                                     </FormItem>
                                 )} />
-                                <FormField control={form.control} name="work_location" render={({ field }) => (
+                                <FormField control={form.control} name="work_location" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Work Location</FormLabel><FormControl><Input placeholder="Office / Remote" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="official_email" render={({ field }) => (
+                                <FormField control={form.control} name="official_email" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Official Email (Auto-generated if empty)</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="probation_period_months" render={({ field }) => (
+                                <FormField control={form.control} name="probation_period_months" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Probation (Months)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="confirmation_date" render={({ field }) => (
+                                <FormField control={form.control} name="confirmation_date" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Confirmation Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </div>
@@ -433,52 +436,52 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
                         <TabsContent value="salary" className="space-y-4">
                             <h3 className="font-semibold mb-2">Bank Details</h3>
                             <div className="grid grid-cols-2 gap-4">
-                                <FormField control={form.control} name="bank_name" render={({ field }) => (
+                                <FormField control={form.control} name="bank_name" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Bank Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="bank_account_no" render={({ field }) => (
+                                <FormField control={form.control} name="bank_account_no" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Account Number</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="bank_ifsc" render={({ field }) => (
+                                <FormField control={form.control} name="bank_ifsc" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>IFSC Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="bank_branch" render={({ field }) => (
+                                <FormField control={form.control} name="bank_branch" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Branch</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </div>
                             <Separator className="my-4" />
                             <h3 className="font-semibold mb-2">Statutory Details</h3>
                             <div className="grid grid-cols-2 gap-4">
-                                <FormField control={form.control} name="pan_number" render={({ field }) => (
+                                <FormField control={form.control} name="pan_number" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>PAN Number</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="aadhaar_number" render={({ field }) => (
+                                <FormField control={form.control} name="aadhaar_number" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Aadhaar Number</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="uan_number" render={({ field }) => (
+                                <FormField control={form.control} name="uan_number" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>UAN (PF)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="esic_number" render={({ field }) => (
+                                <FormField control={form.control} name="esic_number" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>ESIC Number</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </div>
                             <Separator className="my-4" />
                             <h3 className="font-semibold mb-2">Salary Structure (Monthly Snapshot)</h3>
                             <div className="grid grid-cols-2 gap-4">
-                                <FormField control={form.control} name="base_salary" render={({ field }) => (
+                                <FormField control={form.control} name="base_salary" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Base Salary</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="hra" render={({ field }) => (
+                                <FormField control={form.control} name="hra" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>HRA</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="other_allowances" render={({ field }) => (
+                                <FormField control={form.control} name="other_allowances" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>Other Allowances</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
-                                <FormField control={form.control} name="pf_contribution_percent" render={({ field }) => (
+                                <FormField control={form.control} name="pf_contribution_percent" render={({ field }: { field: any }) => (
                                     <FormItem><FormLabel>PF Contribution %</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </div>
-                            <FormField control={form.control} name="esic_applicable" render={({ field }) => (
+                            <FormField control={form.control} name="esic_applicable" render={({ field }: { field: any }) => (
                                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                                     <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                                     <div className="space-y-1 leading-none"><FormLabel>ESIC Applicable</FormLabel></div>

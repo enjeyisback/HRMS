@@ -20,6 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox"
 import { Loader2, Building2, Calendar, MapPin, Globe } from "lucide-react"
 import { logAction } from "@/lib/audit-logger"
+import { toast } from "sonner"
 
 import { HolidaySettings } from "./holiday-settings"
 
@@ -90,9 +91,9 @@ export function CompanySettings() {
                 newData: values
             })
 
-            alert("Settings updated successfully")
+            toast.success("Settings updated successfully")
         } catch (error: any) {
-            alert("Error updating settings: " + error.message)
+            toast.error(error.message || "Failed to update settings")
         } finally {
             setSaving(false)
         }

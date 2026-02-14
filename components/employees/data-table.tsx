@@ -13,7 +13,8 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Users } from "lucide-react"
+import { EmptyState } from "@/components/ui/empty-state"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -147,9 +148,13 @@ export function DataTable<TData, TValue>({
                             <TableRow>
                                 <TableCell
                                     colSpan={columns.length}
-                                    className="h-24 text-center"
+                                    className="h-[400px] text-center"
                                 >
-                                    No results.
+                                    <EmptyState
+                                        title="No results found"
+                                        description="Try adjusting your filters or adding a new record."
+                                        icon={Users}
+                                    />
                                 </TableCell>
                             </TableRow>
                         )}
