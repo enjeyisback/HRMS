@@ -1,7 +1,7 @@
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/server"
 
 export async function isSetupRequired(): Promise<boolean> {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { count, error } = await supabase
         .from('employees')
         .select('*', { count: 'exact', head: true })
