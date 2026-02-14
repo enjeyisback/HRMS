@@ -58,6 +58,26 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
+    // Check for "System Setup" requirement (if no employees exist)
+    const isSetupPage = request.nextUrl.pathname === "/setup";
+    const isPublicStatic = request.nextUrl.pathname.startsWith("/_next") ||
+        request.nextUrl.pathname.startsWith("/api") ||
+        request.nextUrl.pathname.includes(".");
+
+    if (!isPublicStatic) {
+        const { count } = await supabase
+            .from('employees')
+            .select('*', { count: 'exact', head: true });
+
+        if (count === 0 && !isSetupPage) {
+            return NextResponse.redirect(new URL("/setup", request.url));
+        }
+
+        if (count && count > 0 && isSetupPage) {
+            return NextResponse.redirect(new URL("/dashboard", request.url));
+        }
+    }
+
     // Role-based route protection for /admin
     if (request.nextUrl.pathname.startsWith("/admin") && user) {
         const { data: employee } = await supabase
