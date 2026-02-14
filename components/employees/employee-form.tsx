@@ -93,7 +93,7 @@ const employeeSchema = z.object({
     role_id: z.string().min(1, { message: "Role is required." }),
 })
 
-type EmployeeFormValues = z.infer<typeof employeeSchema>
+type EmployeeFormValues = z.input<typeof employeeSchema>
 
 export function EmployeeForm({ onClose, initialData }: { onClose: () => void, initialData?: any }) {
     const router = useRouter()
@@ -141,6 +141,34 @@ export function EmployeeForm({ onClose, initialData }: { onClose: () => void, in
             esic_applicable: false,
             probation_period_months: 0,
             role_id: "",
+            employee_code: "",
+            dob: "",
+            blood_group: "",
+            marital_status: "",
+            current_address_street: "",
+            current_address_city: "",
+            current_address_state: "",
+            current_address_zip: "",
+            permanent_address_street: "",
+            permanent_address_city: "",
+            permanent_address_state: "",
+            permanent_address_zip: "",
+            emergency_contact_name: "",
+            emergency_contact_phone: "",
+            work_location: "",
+            official_email: "",
+            bank_account_no: "",
+            bank_name: "",
+            bank_ifsc: "",
+            bank_branch: "",
+            pan_number: "",
+            aadhaar_number: "",
+            uan_number: "",
+            esic_number: "",
+            base_salary: 0,
+            hra: 0,
+            other_allowances: 0,
+            pf_contribution_percent: 0,
         },
     })
 

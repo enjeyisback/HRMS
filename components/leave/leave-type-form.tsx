@@ -51,7 +51,7 @@ const leaveTypeSchema = z.object({
     allow_negative_balance: z.boolean().default(false),
 })
 
-type LeaveFormValues = z.infer<typeof leaveTypeSchema>
+type LeaveFormValues = z.input<typeof leaveTypeSchema>
 
 interface LeaveTypeFormProps {
     initialData?: LeaveType & { leave_policies?: LeavePolicy[] }
@@ -65,7 +65,7 @@ export function LeaveTypeForm({ initialData, onSuccess, onCancel }: LeaveTypeFor
 
     // Flatten initial data if policy exists
     const defaultPolicy = initialData?.leave_policies?.[0]
-    const defaultValues: Partial<LeaveFormValues> = {
+    const defaultValues: LeaveFormValues = {
         name: initialData?.name || "",
         code: initialData?.code || "",
         description: initialData?.description || "",
@@ -157,15 +157,15 @@ export function LeaveTypeForm({ initialData, onSuccess, onCancel }: LeaveTypeFor
                         <h3 className="font-semibold text-sm text-foreground">Basic Information</h3>
                         <Separator />
 
-                        <FormField control={form.control} name="name" render={({ field }) => (
+                        <FormField control={form.control} name="name" render={({ field }: { field: any }) => (
                             <FormItem><FormLabel>Leave Name*</FormLabel><FormControl><Input placeholder="e.g. Casual Leave" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
 
                         <div className="grid grid-cols-2 gap-4">
-                            <FormField control={form.control} name="code" render={({ field }) => (
+                            <FormField control={form.control} name="code" render={({ field }: { field: any }) => (
                                 <FormItem><FormLabel>Short Code</FormLabel><FormControl><Input placeholder="CL" {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
-                            <FormField control={form.control} name="applicable_to" render={({ field }) => (
+                            <FormField control={form.control} name="applicable_to" render={({ field }: { field: any }) => (
                                 <FormItem>
                                     <FormLabel>Applicable To</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -181,16 +181,16 @@ export function LeaveTypeForm({ initialData, onSuccess, onCancel }: LeaveTypeFor
                             )} />
                         </div>
 
-                        <FormField control={form.control} name="description" render={({ field }) => (
+                        <FormField control={form.control} name="description" render={({ field }: { field: any }) => (
                             <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Purpose of this leave..." {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
 
                         <div className="grid grid-cols-2 gap-4 p-4 border rounded-md">
-                            <FormField control={form.control} name="days_per_year" render={({ field }) => (
+                            <FormField control={form.control} name="days_per_year" render={({ field }: { field: any }) => (
                                 <FormItem><FormLabel>Total Days / Year</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
 
-                            <FormField control={form.control} name="carry_forward_allowed" render={({ field }) => (
+                            <FormField control={form.control} name="carry_forward_allowed" render={({ field }: { field: any }) => (
                                 <FormItem className="flex flex-row items-center space-x-3 space-y-0 mt-8">
                                     <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                                     <div className="leading-none">
@@ -201,19 +201,19 @@ export function LeaveTypeForm({ initialData, onSuccess, onCancel }: LeaveTypeFor
                         </div>
 
                         {form.watch("carry_forward_allowed") && (
-                            <FormField control={form.control} name="max_carry_forward_days" render={({ field }) => (
+                            <FormField control={form.control} name="max_carry_forward_days" render={({ field }: { field: any }) => (
                                 <FormItem><FormLabel>Max Carry Forward Days</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
                         )}
 
                         <div className="flex space-x-6">
-                            <FormField control={form.control} name="encashment_allowed" render={({ field }) => (
+                            <FormField control={form.control} name="encashment_allowed" render={({ field }: { field: any }) => (
                                 <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                                     <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                                     <FormLabel className="font-normal">Encashment Allowed</FormLabel>
                                 </FormItem>
                             )} />
-                            <FormField control={form.control} name="requires_approval" render={({ field }) => (
+                            <FormField control={form.control} name="requires_approval" render={({ field }: { field: any }) => (
                                 <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                                     <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                                     <FormLabel className="font-normal">Requires Approval</FormLabel>
@@ -227,7 +227,7 @@ export function LeaveTypeForm({ initialData, onSuccess, onCancel }: LeaveTypeFor
                         <h3 className="font-semibold text-sm text-foreground">Usage Policies</h3>
                         <Separator />
 
-                        <FormField control={form.control} name="accrual_method" render={({ field }) => (
+                        <FormField control={form.control} name="accrual_method" render={({ field }: { field: any }) => (
                             <FormItem>
                                 <FormLabel>Accrual Method</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -244,16 +244,16 @@ export function LeaveTypeForm({ initialData, onSuccess, onCancel }: LeaveTypeFor
                         )} />
 
                         <div className="grid grid-cols-2 gap-4">
-                            <FormField control={form.control} name="min_advance_days_notice" render={({ field }) => (
+                            <FormField control={form.control} name="min_advance_days_notice" render={({ field }: { field: any }) => (
                                 <FormItem><FormLabel>Min Advance Notice (Days)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
-                            <FormField control={form.control} name="max_consecutive_days" render={({ field }) => (
+                            <FormField control={form.control} name="max_consecutive_days" render={({ field }: { field: any }) => (
                                 <FormItem><FormLabel>Max Consecutive Days</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
                         </div>
 
                         <div className="space-y-4 border p-4 rounded-md bg-muted/20">
-                            <FormField control={form.control} name="sandwich_rule_enabled" render={({ field }) => (
+                            <FormField control={form.control} name="sandwich_rule_enabled" render={({ field }: { field: any }) => (
                                 <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                                     <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                                     <div className="space-y-1 leading-none">
@@ -263,7 +263,7 @@ export function LeaveTypeForm({ initialData, onSuccess, onCancel }: LeaveTypeFor
                                 </FormItem>
                             )} />
 
-                            <FormField control={form.control} name="allow_negative_balance" render={({ field }) => (
+                            <FormField control={form.control} name="allow_negative_balance" render={({ field }: { field: any }) => (
                                 <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                                     <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                                     <div className="space-y-1 leading-none">

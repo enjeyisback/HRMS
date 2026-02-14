@@ -222,3 +222,9 @@ export interface SalaryTemplateComponent {
     default_amount: number
     default_percentage: number
 }
+
+export interface Department {
+    id: string
+    name: string
+    created_at?: string
+}

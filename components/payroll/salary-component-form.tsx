@@ -38,7 +38,7 @@ const formSchema = z.object({
     statutory_type: z.enum(["PF", "ESIC", "PT", "TDS"]).optional().nullable(),
 })
 
-type FormData = z.infer<typeof formSchema>
+type FormData = z.input<typeof formSchema>
 
 interface SalaryComponentFormProps {
     component?: SalaryComponent

@@ -37,12 +37,16 @@ export function EmailSettings() {
     const [saving, setSaving] = useState(false)
     const [settingsId, setSettingsId] = useState<string | null>(null)
 
-    const form = useForm<z.infer<typeof emailSchema>>({
+    const form = useForm<z.input<typeof emailSchema>>({
         resolver: zodResolver(emailSchema),
         defaultValues: {
             smtp_host: "",
             smtp_port: 587,
+            smtp_user: "",
+            smtp_pass: "",
             encryption: "TLS",
+            from_email: "",
+            from_name: "",
         },
     })
 
@@ -59,7 +63,7 @@ export function EmailSettings() {
         fetchSettings()
     }, [form])
 
-    async function onSubmit(values: z.infer<typeof emailSchema>) {
+    async function onSubmit(values: z.input<typeof emailSchema>) {
         setSaving(true)
         const supabase = createClient()
 

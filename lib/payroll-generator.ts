@@ -126,22 +126,22 @@ export async function calculateMonthlyPayroll(
         )
         const basicAmount = basicComponent ? (basicComponent.amount * (totalPayableDays / workingDaysCount)) : 0
 
-        let totalEarnings = 0
-        let totalDeductions = 0
+        let totalEarnings = 0;
+        let totalDeductions = 0;
 
-            // Map components scaled to present days
-            (assignment as any).salary_assignment_components.forEach((ac: any) => {
-                const comp = ac.salary_components
-                const scaledAmount = ac.amount * (totalPayableDays / workingDaysCount)
+        // Map components scaled to present days
+        (assignment as any).salary_assignment_components.forEach((ac: any) => {
+            const comp = ac.salary_components
+            const scaledAmount = ac.amount * (totalPayableDays / workingDaysCount)
 
-                if (comp.type === 'Earning') {
-                    earnings.push({ name: comp.name, amount: scaledAmount })
-                    totalEarnings += scaledAmount
-                } else if (comp.type === 'Deduction' && !comp.is_statutory) {
-                    deductions.push({ name: comp.name, amount: ac.amount }) // Most non-statutory deductions like Professional Tax or specific recovery are fixed
-                    totalDeductions += ac.amount
-                }
-            })
+            if (comp.type === 'Earning') {
+                earnings.push({ name: comp.name, amount: scaledAmount })
+                totalEarnings += scaledAmount
+            } else if (comp.type === 'Deduction' && !comp.is_statutory) {
+                deductions.push({ name: comp.name, amount: ac.amount }) // Most non-statutory deductions like Professional Tax or specific recovery are fixed
+                totalDeductions += ac.amount
+            }
+        })
 
         // Statutory
         const pf = calculatePF(basicAmount)

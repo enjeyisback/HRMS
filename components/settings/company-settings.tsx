@@ -41,11 +41,18 @@ export function CompanySettings() {
     const [saving, setSaving] = useState(false)
     const [settingsId, setSettingsId] = useState<string | null>(null)
 
-    const form = useForm<z.infer<typeof companySchema>>({
+    const form = useForm<z.input<typeof companySchema>>({
         resolver: zodResolver(companySchema),
         defaultValues: {
             company_name: "",
+            contact_email: "",
+            contact_phone: "",
+            address_street: "",
+            address_city: "",
+            address_state: "",
+            address_zip: "",
             financial_year_start_month: 4,
+            working_days: [1, 2, 3, 4, 5],
         },
     })
 
@@ -72,7 +79,7 @@ export function CompanySettings() {
         fetchSettings()
     }, [form])
 
-    async function onSubmit(values: z.infer<typeof companySchema>) {
+    async function onSubmit(values: z.input<typeof companySchema>) {
         setSaving(true)
         const supabase = createClient()
 
