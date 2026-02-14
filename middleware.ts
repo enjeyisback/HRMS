@@ -65,7 +65,17 @@ export async function middleware(request: NextRequest) {
         request.nextUrl.pathname.includes(".");
 
     if (!isPublicStatic) {
-        const { count } = await supabase
+        // IMPORTANT: Must use service role key here to bypass RLS.
+        // The anon key + RLS returns count=0 even when employees exist,
+        // because RLS policy requires auth.uid() = user_id.
+        const { createClient: createAdminClient } = await import("@supabase/supabase-js");
+        const supabaseAdmin = createAdminClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            { auth: { autoRefreshToken: false, persistSession: false } }
+        );
+
+        const { count } = await supabaseAdmin
             .from('employees')
             .select('*', { count: 'exact', head: true });
 

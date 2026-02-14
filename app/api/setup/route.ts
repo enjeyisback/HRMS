@@ -1,14 +1,39 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: NextRequest) {
-    const supabase = await createClient()
+    // Use Service Role to bypass RLS during setup
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    console.log("Setup Debug - URL:", supabaseUrl)
+    console.log("Setup Debug - Service Key Length:", serviceKey?.length)
+    console.log("Setup Debug - Service Key Prefix:", serviceKey?.substring(0, 10))
+
+    if (!supabaseUrl || !serviceKey) {
+        return NextResponse.json({ error: "Supabase environment variables missing on server" }, { status: 500 })
+    }
+
+    const supabaseAdmin = createSupabaseClient(
+        supabaseUrl,
+        serviceKey,
+        {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false
+            }
+        }
+    )
 
     try {
         const { email, password, full_name } = await request.json()
 
+        if (!email || !password || !full_name) {
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+        }
+
         // 1. Verify system is indeed empty (no employees)
-        const { count: empCount } = await supabase
+        const { count: empCount } = await supabaseAdmin
             .from('employees')
             .select('*', { count: 'exact', head: true })
 
@@ -25,7 +50,7 @@ export async function POST(request: NextRequest) {
         ]
 
         for (const role of roles) {
-            await supabase.from('app_roles').upsert(role, { onConflict: 'name' })
+            await supabaseAdmin.from('app_roles').upsert(role, { onConflict: 'name' })
         }
 
         // 3. Self-heal: Ensure basic permissions exist
@@ -50,54 +75,49 @@ export async function POST(request: NextRequest) {
         ]
 
         for (const perm of permissions) {
-            await supabase.from('app_permissions').upsert(perm, { onConflict: 'code' })
+            await supabaseAdmin.from('app_permissions').upsert(perm, { onConflict: 'code' })
         }
 
         // 4. Map Super Admin permissions
-        const { data: superAdminRole } = await supabase.from('app_roles').select('id').eq('name', 'Super Admin').single()
-        const { data: allPerms } = await supabase.from('app_permissions').select('id')
+        const { data: superAdminRole } = await supabaseAdmin.from('app_roles').select('id').eq('name', 'Super Admin').single()
+        const { data: allPerms } = await supabaseAdmin.from('app_permissions').select('id')
 
         if (superAdminRole && allPerms) {
             const rolePerms = allPerms.map(p => ({ role_id: superAdminRole.id, permission_id: p.id }))
-            await supabase.from('role_permissions').upsert(rolePerms, { onConflict: 'role_id,permission_id' })
+            await supabaseAdmin.from('role_permissions').upsert(rolePerms, { onConflict: 'role_id,permission_id' })
         }
 
         // 5. Ensure default Department and Designation exist
-        const { data: dept } = await supabase.from('departments').select('id').limit(1).single()
+        const { data: dept } = await supabaseAdmin.from('departments').select('id').limit(1).single()
         let deptId = dept?.id
         if (!deptId) {
-            const { data: newDept } = await supabase.from('departments').insert({ name: 'Administration', code: 'ADMIN' }).select().single()
+            const { data: newDept } = await supabaseAdmin.from('departments').insert({ name: 'Administration', code: 'ADMIN' }).select().single()
             deptId = newDept?.id
         }
 
-        const { data: desig } = await supabase.from('designations').select('id').limit(1).single()
+        const { data: desig } = await supabaseAdmin.from('designations').select('id').limit(1).single()
         let desigId = desig?.id
         if (!desigId) {
-            const { data: newDesig } = await supabase.from('designations').insert({ title: 'Super Administrator', level: 10 }).select().single()
+            const { data: newDesig } = await supabaseAdmin.from('designations').insert({ title: 'Super Administrator', level: 10 }).select().single()
             desigId = newDesig?.id
         }
 
-        // 6. Sign up the user (or get if already exists but not in employees)
-        const { data: authData, error: authError } = await supabase.auth.signUp({
+        // 6. Create the Admin User using Admin API (Bypasses email confirmation)
+        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
             email,
             password,
-            options: {
-                data: {
-                    full_name: full_name
-                }
-            }
+            email_confirm: true,
+            user_metadata: { full_name }
         })
 
-        // Handle case where user might already exist in Auth but not in Employees
         let userId = authData?.user?.id
         if (authError) {
-            if (authError.message.includes("already registered")) {
-                const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-                    email,
-                    password,
-                })
-                if (signInError) throw signInError
-                userId = signInData.user.id
+            if (authError.message.includes("already registered") || authError.message.includes("Email already exists")) {
+                const { data: usersData, error: listError } = await supabaseAdmin.auth.admin.listUsers()
+                if (listError) throw listError
+                const existingUser = usersData.users.find(u => u.email === email)
+                if (!existingUser) throw new Error("User exists but could not be retrieved")
+                userId = existingUser.id
             } else {
                 throw authError
             }
@@ -106,7 +126,7 @@ export async function POST(request: NextRequest) {
         if (!userId) throw new Error("Could not identify user ID")
 
         // 7. Create Employee record as Super Admin
-        const { error: empError } = await supabase
+        const { error: empError } = await supabaseAdmin
             .from('employees')
             .insert({
                 user_id: userId,
@@ -123,8 +143,8 @@ export async function POST(request: NextRequest) {
 
         if (empError) {
             // If employee already exists for this email, just update it to be Super Admin
-            if (empError.message.includes("unique_employees_email")) {
-                await supabase.from('employees').update({
+            if (empError.message.includes("unique") || empError.code === '23505') {
+                await supabaseAdmin.from('employees').update({
                     role_id: superAdminRole?.id,
                     user_id: userId
                 }).eq('email', email)
