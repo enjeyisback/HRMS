@@ -102,25 +102,30 @@ export async function POST(request: NextRequest) {
             desigId = newDesig?.id
         }
 
-        // 6. Create the Admin User using Admin API (Bypasses email confirmation)
-        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-            email,
-            password,
-            email_confirm: true,
-            user_metadata: { full_name }
-        })
+        // 6. Find or Create the Admin User
+        let userId: string | undefined
 
-        let userId = authData?.user?.id
-        if (authError) {
-            if (authError.message.includes("already registered") || authError.message.includes("Email already exists")) {
-                const { data: usersData, error: listError } = await supabaseAdmin.auth.admin.listUsers()
-                if (listError) throw listError
-                const existingUser = usersData.users.find(u => u.email === email)
-                if (!existingUser) throw new Error("User exists but could not be retrieved")
-                userId = existingUser.id
-            } else {
-                throw authError
-            }
+        // Check if user already exists in Auth
+        const { data: usersData } = await supabaseAdmin.auth.admin.listUsers()
+        const existingUser = usersData?.users?.find(u => u.email === email)
+
+        if (existingUser) {
+            userId = existingUser.id
+            // Update password to what user provided (in case they forgot the old one)
+            await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
+                password,
+                email_confirm: true,
+                user_metadata: { full_name }
+            })
+        } else {
+            const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+                email,
+                password,
+                email_confirm: true,
+                user_metadata: { full_name }
+            })
+            if (authError) throw authError
+            userId = authData.user?.id
         }
 
         if (!userId) throw new Error("Could not identify user ID")
